@@ -1,0 +1,172 @@
+///////////////////////////////////////////////////////////////////////////////
+1. Visualisation des valeurs manquantes
+📊 Graphique : Matrice de valeurs manquantes
+
+#################################
+msno.matrix(df)
+plt.title("Visualisation des valeurs manquantes")
+plt.show()
+#################################
+✅ Objectif : Vérifier si certaines colonnes du dataset contiennent des valeurs absentes .
+🔎 Interprétation :
+
+Si la montre graphique des lignes blanches ,
+cela signifie que certaines colonnes ont des valeurs manquantes .
+Une forte proportion de valeurs manquantes peut fausser l'analyse
+ et nécessiter un traitement (suppression, imputation, etc.).
+
+///////////////////////////////////////////////////////////////////////////////
+2. Distribution de la durée des flux
+📊 Graphique : Histogramme de la durée des flux
+
+#################################
+sns.histplot(df['Flow Duration'], kde=True, bins=20, color="blue")
+plt.title("Distribution de la durée des flux")
+plt.xlabel("Durée du flux"(ms) )
+plt.ylabel("Fréquence")
+#################################
+✅ Objectif : Comprendre la répartition des durées des flux .
+🔎 Interprétation :
+
+Si l'histogramme montre une image très élevée vers 0 ms , 
+cela indique une forte concentration de connexions très courtes , typique des attaques DoS .
+Une distribution étalée signifie une plus grande variabilité dans la durée des flux, 
+ce qui est plus commun dans un trafic réseau normal .
+
+///////////////////////////////////////////////////////////////////////////////
+3. Boxplot de la durée des flux par type de trafic
+📊 Graphique : Boxplot de la durée des flux
+
+#################################
+sns.boxplot(x='Label', y='Flow Duration', data=df)
+plt.title("Boxplot de la durée des flux par type de trafic")
+plt.xlabel( Label (Normal vs. Attaque)  )
+plt.ylabel("Durée du flux")
+#################################
+✅ Objectif : Comparer la durée des flux entre le trafic normal et les attaques .
+🔎 Interprétation :
+
+Si la boîte du trafic normal est centrée autour de valeurs moyennes , 
+cela signifie une distribution stable des flux.
+Si la boîte du trafic malveillant montre beaucoup d
+e valeurs extrêmes (outliers) , 
+cela signifie qu'il y a des comportements anormaux liés 
+aux attaques (ex : connexions très courtes ou très longues).
+
+///////////////////////////////////////////////////////////////////////////////
+4. Matrice de corrélation
+📊 Graphique : Heatmap des corrélations
+
+#################################
+sns.heatmap(corr_matrix, cmap='coolwarm', annot=True, fmt='.2f', square=True)
+plt.title("Matrice de Corrélation - UDP Flood")
+plt.savefig('correlation.png', dpi=300)
+#################################
+✅ Objectif : Identifier les relations entre les variables du jeu de données.
+🔎 Interprétation :
+
+Une corrélation proche de 1 (rouge foncé) signifie que deux variables sont très similaires , 
+donc l'une peut être supprimée pour éviter la redondance.
+Une corrélation négative (bleu foncé) signifie que les variables évoluent en sens inverse .
+Ce graphique aide à identifier quelles variables sont les plus pertinentes 
+pour détecter une attaque.
+
+///////////////////////////////////////////////////////////////////////////////
+5. Répartition des types d'attaques
+📊 Graphique : Nombre d'occurrences des attaques
+
+#################################
+sns.countplot(x='Label', data=df, hue='Label', palette='viridis', legend=False)
+plt.title("Répartition des types d'attaques")
+plt.xlabel("Type d'attaque")
+plt.ylabel("Nombre d'occurrences")
+#################################
+✅ Objectif : Visualiser la fréquence de chaque type d'attaque .
+🔎 Interprétation :
+
+Si une attaque spécifique (ex : UDP Flood) représente 90% des cas , 
+cela signifie que cette attaque est très dominante .
+Ce graphique est utile pour prioriser la détection des attaques les plus fréquentes.
+
+///////////////////////////////////////////////////////////////////////////////
+6. Pairplot des variables UDP Flood
+📊 Graphique : Pairplot (Relations entre les variables)
+
+#################################
+sns.pairplot(df_cleaned_sample[cols_to_plot], diag_kind="kde")
+plt.suptitle("Pairplot des variables UDP Flood (10 000 échantillons), y=1.02)
+plt.show()
+#################################
+✅ Objectif : Vérifier comment les variables sont liées entre elles .
+🔎 Interprétation :
+
+Des groupes bien distincts peuvent indiquer la présence de clusters 
+naturels (ex : trafic normal vs attaque).
+Une distribution uniforme signifie que les variables n'ont pas de lien fort entre elles.
+Si une variable suit un schéma linéaire avec une autre , 
+cela peut indiquer une relation de cause à effet .
+
+///////////////////////////////////////////////////////////////////////////////
+7. Méthode du Coude pour K-Means
+📊 Graphique : Inertie en fonction du nombre de clusters
+
+#################################
+plt.plot(K_range, inertia, marker='o', linestyle='--')
+plt.xlabel('Nombre de clusters (k)')
+plt.ylabel('Inertie')
+plt.title("Méthode du coude pour choisir k")
+plt.show()
+#################################
+✅ Objectif : Trouver le bon nombre de clusters pour le clustering K-Means .
+🔎 Interprétation :
+
+Le coude du graphique représente le point optimal où ajouter plus de clusters 
+n'améliore plus beaucoup l'inertie .
+Par exemple, si l'inertie diminue fortement jusqu'à k = 5 , alors 5 clusters 
+sont suffisants pour séparer les attaques.
+
+///////////////////////////////////////////////////////////////////////////////
+8. Visualisation des clusters K-Means
+📊 Graphique : Nuage de points des clusters en PCA
+
+#################################
+plt.scatter(X_pca[:, 0], X_pca[:, 1], c=labels, cmap='viridis', s=100, edgecolors='k')
+plt.scatter(centers[:, 0], centers[:, 1], c='red', marker='X', s=200, label='Centres')
+plt.xlabel('PC1')
+plt.ylabel('PC2')
+plt.title('Visualisation des clusters K-means')
+plt.legend()
+#################################
+✅ Objectif : Visualiser les groupes d'attaques trouvés par K-Means.
+🔎 Interprétation :
+
+Chaque point représente une connexion réseau .
+Les différentes couleurs représentent différents clusters d'attaques .
+Si les clusters sont bien séparés, l'algorithme a bien segmenté les types d'attaques.
+
+///////////////////////////////////////////////////////////////////////////////
+9. Dendrogramme du Clustering Hiérarchique
+📊 Graphique : Dendrogramme
+
+#################################
+dendrogram(linked, truncate_mode='level', p=5, color_threshold=100)
+plt.axhline(y=100, color='r', linestyle='--', label="Seuil de coupure")
+plt.title("Dendrogramme du Clustering Hiérarchique (échantillon))
+plt.xlabel("Échantillons")
+plt.ylabel("Distance")
+#################################
+
+✅ Objectif : Regrouper les attaques similaires sous forme d'arbre.
+🔎 Interprétation :
+
+Chaque branche représente un groupe d'attaques similaires .
+Plus une branche est courte , plus les attaques sont proches entre elles.
+Une grande séparation dans l'arbre signifie des groupes très différents.
+Conclusion
+Ces graphiques permettent d'explorer, comprendre et détecter les attaques UDP Flood :
+
+Matrice de valeurs manquantes → Vérifie la qualité des données.
+Histogramme & Boxplot → Détecter les anomalies dans la durée des flux.
+Matrice de corrélation → Identifier les variables utiles pour la détection.
+Répartition des attaques → Prioriser les menaces dominantes.
+K-Means & Dendrogramme → Segmenter les attaques en clusters distincts 
